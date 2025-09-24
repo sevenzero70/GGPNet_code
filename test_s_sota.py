@@ -118,7 +118,7 @@ parser.add_argument("--batch_size", type=int, default=1, help="Training batch si
 parser.add_argument("--msi_channel", type=int, default=4, help='MSI channel')
 parser.add_argument("--pan_channel", type=int, default=1, help='PAN channel')
 parser.add_argument("--kernel_channel", type=int, default=64, help='convolutional output behind the image input')   # 在服务器上计算时修改为64
-parser.add_argument("--data_type", type=str, default='PReNetGradient', help='reduce, full')
+parser.add_argument("--data_type", type=str, default='PReNetGradient', help='same as model_name')
 parser.add_argument("--img_save_path", type=str, default='RGB_img')
 parser.add_argument("--value_txt", type=str, default='value_info')
 parser.add_argument("--vmax", type=float , default=0.1, help='diff max value')
