@@ -26,31 +26,8 @@ import datetime
 import argparse
 
 def model_type(model_name):
-    if model_name == "PReNet_MSI":
-        return PReNet_MSI
-    elif model_name == "PReNet_PAN":
-        return PReNet_PAN
-    # elif model_name == "PRN":
-    #     return PRN
-    elif model_name == "PReNetSCAMOne":
-        return PReNetSCAMOne
-    elif model_name == "PReNetSCAMResTwo":
-        return PReNetSCAMResTwo
-    elif model_name == "PReNetSCAMTwo":
-        return PReNetSCAMTwo
-    elif model_name == "PReNetS2Block":
-        return PReNetS2Block
-    elif model_name == "PReNetGradient":
-        return PReNetGradient
-    elif model_name == "PReNetGradientFuse":
-        return PReNetGradientFuse
-    elif model_name == "PReNetGradientFuse_":
-        return PReNetGradientFuse_
-
-    elif model_name == "ResNetGradient":
-        return ResNetGradient
-    elif model_name == "PReNetDiffGradient":
-        return PReNetDiffGradient
+    if model_name == "GGPNet":
+        return GGPNet
     else:
         raise ValueError(f"Unknown model name: {model_name}")
 
@@ -66,14 +43,14 @@ parser.add_argument("--eval_freq", type=int, default=100, help='frequency of eva
 parser.add_argument("--optimizer", type=str, default='Adam', help='Adam, AdamW')
 parser.add_argument('--seed', type=int, default='3047', help='seed number')
 # Path
-parser.add_argument("--save_path", type=str, default='logs/0709/gcm_gf2_grad_log', help='path to save models and log files')
+parser.add_argument("--save_path", type=str, default='logs/wv3', help='path to save models and log files')
 parser.add_argument("--data_path",type=str, default='../Datasets/GF2_Deng/train.h5',help='path to training data')
 parser.add_argument("--valid_path",type=str, default='../Datasets/GF2_Deng/test_h5/test_multiExm1.h5',help='path to valid data')
 # Channel info
 parser.add_argument("--msi_channel", type=int, default=4, help='MSI channel')
 parser.add_argument("--pan_channel", type=int, default=1, help='PAN channel')
 parser.add_argument("--kernel_channel", type=int, default=32, help='convolutional output behind the image input')   # 在服务器上计算时修改为64 light改为32
-parser.add_argument("--model_name", type=model_type, default='PReNetDiffGradient', help='choose model')
+parser.add_argument("--model_name", type=model_type, default='GGPNet', help='choose model')
 # Loss info
 parser.add_argument("--grad_loss", type=float, default=0.2, help='proportion of the grad_loss')
 parser.add_argument("--pixel_loss", type=float, default=0.8, help='proportion of the metric_loss')
@@ -176,25 +153,10 @@ def main():
             out_train, _, out_grad = model(lms, pan)
             gt_grad = grad_net(gt)
 
-            # 都用ssim loss
+            # ssim loss
             grad_metric = criterion2(gt_grad, out_grad)
             pixel_metric = criterion2(gt, out_train)
             loss = -(opt.pixel_loss*pixel_metric + opt.grad_loss*grad_metric)
-
-            # # test 0220 grad用ssim loss，pixel用l1loss
-            # grad_metric = -criterion2(gt_grad, out_grad)
-            # pixel_metric = criterion1(gt, out_train)
-            # loss = (opt.pixel_loss*pixel_metric + opt.grad_loss*grad_metric)
-
-            # # test 0221 都用l1loss
-            # grad_metric = criterion1(gt_grad, out_grad)
-            # pixel_metric = criterion1(gt, out_train)
-            # loss = (opt.pixel_loss*pixel_metric + opt.grad_loss*grad_metric)
-
-            # test 0225 grad用l1loss，pixel用ssimloss
-            # grad_metric = criterion1(gt_grad, out_grad)
-            # pixel_metric = -criterion2(gt, out_train)
-            # loss = (opt.pixel_loss*pixel_metric + opt.grad_loss*grad_metric)
 
             epoch_train_loss.append(loss.item())
 
@@ -290,15 +252,6 @@ def main():
                 t_start = time.time()
 
 
-                # out_train, _ = model(input_train, pan)
-                # out_train = torch.clamp(out_train, 0., 1.)
-                # im_target = utils.make_grid(target_train.data, nrow=8, normalize=True, scale_each=True)
-                # im_input = utils.make_grid(input_train.data, nrow=8, normalize=True, scale_each=True)
-                # im_derain = utils.make_grid(out_train.data, nrow=8, normalize=True, scale_each=True)
-                # writer.add_image('clean image', im_target, epoch+1)
-                # writer.add_image('rainy image', im_input, epoch+1)
-                # writer.add_image('deraining image', im_derain, epoch+1)
-
                 torch.save(model, os.path.join(opt.save_path, 'net_epoch%d.pth' % (epoch+1)))
                 # save best SAM epoch
                 if v_sam <= best_sam:
@@ -327,8 +280,6 @@ def main():
         # save model
         # torch.save(model.state_dict(), os.path.join(opt.save_path, 'net_latest.pth'))
         torch.save(model, os.path.join(opt.save_path, 'net_latest.pth'))
-        # if epoch % opt.save_freq == 0:
-        #     torch.save(model.state_dict(), os.path.join(opt.save_path, 'net_epoch%d.pth' % (epoch+1)))
 
 
 if __name__ == "__main__":
