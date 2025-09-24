@@ -15,14 +15,11 @@ The code is tested on the following datasets:
 
 ## Training
 To train the model, run the following command:
-> python train_PReNet.py
+> python train_GGPNet.py
 
 ## Testing
 To test the model, run the following command:
-> python test_s_sota.py --model_name PReNetGradient
-
-## Pretrained models
-We will provide the following pretrained models
+> python test_s_sota.py
 
 ## Citation
 Liang L, Li T, Wang G, et al. Unlocking spatial textures: Gradient-guided pansharpening for enhancing multispectral imagery[J]. Neurocomputing, 2025: 131607.
